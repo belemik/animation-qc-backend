@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Animation QC AI</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="app-shell app-shell-with-sidebar">
+    <aside id="catalogSidebar" class="catalog-sidebar">
+      <div class="catalog-sidebar__top">
+        <div class="catalog-strip-head">
+          <div class="catalog-strip-stack">
+            <div class="catalog-brand-logo logo">AQ</div>
+            <button
+              id="sidebarToggleBtn"
+              class="catalog-icon-btn catalog-toggle-btn"
+              type="button"
+              title="Свернуть / развернуть меню"
+            >
+              ‹
+            </button>
+          </div>
+        </div>
+
+        <div class="catalog-content-head">
+          <h2 id="catalogTitle">Animation QC AI</h2>
+        </div>
+
+        <div class="catalog-section">
+          <div class="catalog-section__head">
+            <span>Проекты</span>
+            <button id="addProjectBtn" class="catalog-icon-btn" type="button" title="Добавить проект">＋</button>
+          </div>
+
+          <div id="projectCreateRow" class="project-create-row hidden">
+            <input id="newProjectInput" type="text" placeholder="Название проекта" />
+            <div class="project-create-actions">
+              <button id="saveProjectBtn" class="primary-btn small-btn" type="button">Ок</button>
+              <button id="cancelProjectBtn" class="secondary-btn small-btn" type="button">✕</button>
+            </div>
+          </div>
+
+          <div id="projectsList" class="projects-list"></div>
+        </div>
+      </div>
+
+      <div class="catalog-sidebar__bottom"></div>
+    </aside>
+
+    <div class="main-app">
+      <header class="topbar">
+        <div class="topbar-left"></div>
+
+        <div class="topbar-right">
+          <div class="reviewer-chip">
+            <div class="reviewer-avatar">АК</div>
+            <div class="reviewer-meta">
+              <span>Анна Кузнецова</span>
+              <small>Оператор QC</small>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="page-header">
+        <div class="page-header-row">
+          <div class="breadcrumbs">
+            Проекты <span>›</span> <strong id="projectBreadcrumb">Игрулька / ...</strong>
+          </div>
+          <button id="headerSubmitBtn" class="primary-btn header-action-btn" type="button">Отправить</button>
+        </div>
+
+        <div class="page-tabs">
+          <button id="tabWorkspace" class="page-tab active" type="button">Основное</button>
+          <button id="tabHistory" class="page-tab" type="button">История</button>
+          <button id="tabDataset" class="page-tab" type="button">Датасет</button>
+        </div>
+      </div>
+
+      <!-- ОСНОВНОЕ -->
+      <main id="workspaceView" class="main-layout">
+        <aside class="left-column">
+          <div class="left-scroll">
+            <section class="panel">
+              <h2>Проект</h2>
+
+              <div class="field">
+                <label for="projectNameField">Наименование проекта</label>
+                <input id="projectNameField" type="text" placeholder="Например: Игрулька" />
+              </div>
+
+              <div class="field">
+                <label for="videoTitleField">Наименование видео</label>
+                <input id="videoTitleField" type="text" placeholder="Например: Геймпад" />
+              </div>
+
+              <div class="field">
+                <label for="executorSelect">Исполнитель</label>
+                <select id="executorSelect">
+                  <option value="">Не выбрано</option>
+                  <option value="Черный квадрат">Черный квадрат</option>
+                  <option value="Союзмультфильм">Союзмультфильм</option>
+                  <option value="Паровоз">Паровоз</option>
+                  <option value="СТВ">СТВ</option>
+                  <option value="Внутренняя команда">Внутренняя команда</option>
+                </select>
+              </div>
+            </section>
+
+            <section class="panel">
+              <h2>Загрузка видео</h2>
+
+              <div id="dropzone" class="dropzone">
+                <input id="fileInput" type="file" accept="video/*" hidden />
+                <p class="dropzone-title">Перетащите видео сюда</p>
+                <p class="dropzone-subtitle">или нажмите на область для загрузки</p>
+              </div>
+
+              <div id="uploadMeta" class="upload-meta hidden">
+                <div class="meta-row">
+                  <span>Файл:</span>
+                  <strong id="fileNameValue" class="filename-value">—</strong>
+                </div>
+                <div class="meta-row">
+                  <span>ID видео:</span>
+                  <strong id="videoIdValue">—</strong>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <h2>Статус проверки</h2>
+
+              <div class="stats">
+                <div class="stat">
+                  <span>Статус</span>
+                  <strong id="statusValue">Ожидание</strong>
+                </div>
+                <div class="stat">
+                  <span>Всего дефектов</span>
+                  <strong id="defectsCountValue">0</strong>
+                </div>
+                <div class="stat">
+                  <span>Принято</span>
+                  <strong id="acceptedCountValue">0</strong>
+                </div>
+                <div class="stat">
+                  <span>Отклонено</span>
+                  <strong id="rejectedCountValue">0</strong>
+                </div>
+                <div class="stat">
+                  <span>Ручная</span>
+                  <strong id="manualCountValue">0</strong>
+                </div>
+                <div class="stat">
+                  <span>AI</span>
+                  <strong id="aiCountValue">0</strong>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <h2>Форма дефекта</h2>
+
+              <div class="inner-tabs">
+                <button id="modeAiBtn" class="inner-tab active" type="button">AI</button>
+                <button id="modeManualBtn" class="inner-tab" type="button">Ручной</button>
+                <button id="modeMaskBtn" class="inner-tab" type="button">Разметка</button>
+              </div>
+
+              <div id="aiFormSection">
+                <div class="field">
+                  <label for="aiDefectSelect">Из списка дефектов</label>
+                  <select id="aiDefectSelect"></select>
+                </div>
+
+                <div class="field">
+                  <label for="defectNameField">Наименование дефекта</label>
+                  <input id="defectNameField" type="text" readonly class="disabled-look" />
+                </div>
+
+                <div class="field">
+                  <label for="defectTypeSelect">Тип дефекта</label>
+                  <select id="defectTypeSelect" disabled class="disabled-look">
+                    <option value="person">person</option>
+                    <option value="car">car</option>
+                    <option value="dog">dog</option>
+                    <option value="cat">cat</option>
+                    <option value="flicker">flicker</option>
+                    <option value="frame_jump">frame_jump</option>
+                    <option value="freeze_frame">freeze_frame</option>
+                    <option value="deformation_mask">deformation_mask</option>
+                    <option value="other">other</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="aiDefectTimeField">Тайминг</label>
+                  <input id="aiDefectTimeField" type="text" readonly class="disabled-look" />
+                </div>
+
+                <div id="aiDecisionWrap" class="field">
+                  <label>Решение</label>
+                  <div class="decision-buttons">
+                    <button id="aiRejectBtn" class="danger-btn decision-btn" type="button">Отказать</button>
+                    <button id="aiAcceptBtn" class="primary-btn decision-btn" type="button">Принять</button>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="aiDefectCommentField">Комментарий</label>
+                  <textarea id="aiDefectCommentField" rows="4" placeholder="Напишите комментарий"></textarea>
+                </div>
+              </div>
+
+              <div id="manualFormSection" class="hidden">
+                <div class="field">
+                  <label for="manualDefectNameInput">Наименование дефекта</label>
+                  <input id="manualDefectNameInput" type="text" placeholder="Введите наименование дефекта" />
+                </div>
+
+                <div class="field">
+                  <label for="manualDefectTypeInput">Тип дефекта</label>
+                  <select id="manualDefectTypeInput">
+                    <option value="person">person</option>
+                    <option value="car">car</option>
+                    <option value="dog">dog</option>
+                    <option value="cat">cat</option>
+                    <option value="flicker">flicker</option>
+                    <option value="frame_jump">frame_jump</option>
+                    <option value="freeze_frame">freeze_frame</option>
+                    <option value="deformation_mask">deformation_mask</option>
+                    <option value="other">other</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="manualDefectTimeInput">Тайминг</label>
+                  <input id="manualDefectTimeInput" type="number" min="0" step="0.01" placeholder="Например: 5.04" />
+                </div>
+
+                <div class="field">
+                  <label for="manualDefectCommentInput">Комментарий</label>
+                  <textarea id="manualDefectCommentInput" rows="4" placeholder="Опишите ручной дефект"></textarea>
+                </div>
+
+                <div class="hint-box">
+                  Для ручной фиксации используй иконку карандаша рядом с видеоплеером или кликни по кадру в нужной точке.
+                </div>
+
+                <div class="actions-stack">
+                  <button id="saveManualDefectBtn" class="primary-btn" type="button">Добавить ручной дефект</button>
+                </div>
+              </div>
+
+              <div id="maskFormSection" class="hidden">
+                <div class="field">
+                  <label for="maskDefectNameInput">Наименование дефекта</label>
+                  <input id="maskDefectNameInput" type="text" placeholder="Например: деформация лица" />
+                </div>
+
+                <div class="field">
+                  <label for="maskDefectTypeInput">Тип дефекта</label>
+                  <select id="maskDefectTypeInput">
+                    <option value="deformation_mask">deformation_mask</option>
+                    <option value="flicker">flicker</option>
+                    <option value="frame_jump">frame_jump</option>
+                    <option value="freeze_frame">freeze_frame</option>
+                    <option value="other">other</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label>Инструменты разметки</label>
+                  <div class="mask-tools">
+                    <button id="enableMaskDrawBtn" class="secondary-btn" type="button">Кисть</button>
+                    <button id="clearMaskBtn" class="secondary-btn" type="button">Очистить</button>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="maskBrushSizeInput">Размер кисти</label>
+                  <input id="maskBrushSizeInput" type="range" min="4" max="48" value="14" />
+                </div>
+
+                <div class="field">
+                  <label for="maskAnnotationCommentInput">Комментарий</label>
+                  <textarea id="maskAnnotationCommentInput" rows="4" placeholder="Кратко опишите дефект для датасета"></textarea>
+                </div>
+
+                <div class="hint-box">
+                  Основная работа выполняется прямо на видеоплеере: поставь кадр на паузу и используй иконки кисти и ластика рядом с контролами плеера.
+                </div>
+
+                <div class="hint-box">
+                  После сохранения пример попадёт во вкладку «Датасет» и сможет использоваться для последующего дообучения модели под конкретный проект.
+                </div>
+
+                <div class="actions-stack">
+                  <button id="saveTrainingMaskBtn" class="primary-btn" type="button">Сохранить в датасет</button>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <div class="left-footer">
+            <button id="footerAnalyzeBtn" class="primary-btn footer-submit-btn" type="button">Анализ</button>
+          </div>
+        </aside>
+
+        <section class="right-column">
+          <section class="player-panel">
+            <div class="video-stage">
+              <div id="videoWrapper" class="video-wrapper">
+                <video id="videoPlayer" playsinline></video>
+                <div id="annotationLayer" class="annotation-layer"></div>
+                <canvas id="maskCanvas" class="mask-canvas hidden"></canvas>
+                <div id="clickPreview" class="click-preview hidden"></div>
+                <div id="markerTooltip" class="marker-tooltip hidden"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="defects-panel">
+            <div class="defects-panel-head">
+              <h2>Результаты дефектов</h2>
+            </div>
+            <div id="defectsList" class="defects-list empty-state">Пока нет дефектов</div>
+          </section>
+        </section>
+      </main>
+
+      <!-- ИСТОРИЯ -->
+      <main id="historyView" class="history-layout hidden">
+        <section class="history-panel wide">
+          <div class="defects-panel-head">
+            <h2>История проверок</h2>
+          </div>
+
+          <div class="history-table-wrap">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th><button class="sort-btn" data-sort="project_name">Название</button></th>
+                  <th><button class="sort-btn" data-sort="executor_name">Исполнитель</button></th>
+                  <th><button class="sort-btn" data-sort="video_id">ID видео</button></th>
+                  <th><button class="sort-btn" data-sort="created_at">Дата загрузки</button></th>
+                  <th><button class="sort-btn" data-sort="status">Статус</button></th>
+                  <th><button class="sort-btn" data-sort="ai_count">Проверка от ИИ</button></th>
+                  <th><button class="sort-btn" data-sort="manual_count">Ручная</button></th>
+                  <th><button class="sort-btn" data-sort="accepted_count">Принято</button></th>
+                  <th><button class="sort-btn" data-sort="rejected_count">Отклонено</button></th>
+                  <th><button class="sort-btn" data-sort="reviewer_name">Автор</button></th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody">
+                <tr>
+                  <td colspan="10" class="history-empty">История пока пуста</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+
+      <!-- ДАТАСЕТ -->
+      <main id="datasetView" class="history-layout hidden">
+        <section class="history-panel wide">
+          <div class="defects-panel-head">
+            <h2>Датасет проекта</h2>
+          </div>
+
+          <div class="dataset-layout dataset-layout-single">
+            <section class="panel dataset-panel wide-dataset-panel">
+              <h3>Источники и пополнение датасета</h3>
+
+              <div class="dataset-unified-grid dataset-unified-grid--top">
+                <div class="dataset-unified-section">
+                  <h4>Импорт своих примеров</h4>
+
+                  <div id="manualDatasetFrameDropzone" class="dropzone compact-dropzone">
+                    <input id="manualDatasetFrameInput" type="file" accept="image/*" hidden />
+                    <p class="dropzone-title">Перетащите frame image сюда</p>
+                    <p class="dropzone-subtitle">или нажмите на область для загрузки</p>
+                  </div>
+
+                  <div id="manualDatasetMaskDropzone" class="dropzone compact-dropzone">
+                    <input id="manualDatasetMaskInput" type="file" accept="image/*" hidden />
+                    <p class="dropzone-title">Перетащите mask image сюда</p>
+                    <p class="dropzone-subtitle">или нажмите на область для загрузки</p>
+                  </div>
+
+                  <div class="dataset-inline-fields">
+                    <div class="field">
+                      <label for="manualDatasetNameInput">Наименование дефекта</label>
+                      <input id="manualDatasetNameInput" type="text" placeholder="Например: деформация лица" />
+                    </div>
+
+                    <div class="field">
+                      <label for="manualDatasetTypeInput">Тип дефекта</label>
+                      <select id="manualDatasetTypeInput">
+                        <option value="deformation_mask">deformation_mask</option>
+                        <option value="flicker">flicker</option>
+                        <option value="frame_jump">frame_jump</option>
+                        <option value="freeze_frame">freeze_frame</option>
+                        <option value="other">other</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label for="manualDatasetCommentInput">Комментарий</label>
+                    <textarea id="manualDatasetCommentInput" rows="3" placeholder="Опишите пример для проекта"></textarea>
+                  </div>
+
+                  <div class="actions-stack actions-stack--compact">
+                    <button id="saveManualDatasetBtn" class="primary-btn compact-action-btn" type="button">Добавить в датасет</button>
+                  </div>
+                </div>
+
+                <div class="dataset-unified-section">
+                  <h4>Подключение датасета</h4>
+
+                  <div id="datasetDropzone" class="dropzone compact-dropzone">
+                    <input id="datasetZipInput" type="file" accept=".zip" hidden />
+                    <p class="dropzone-title">Перетащите архив сюда</p>
+                    <p class="dropzone-subtitle">или нажмите на область для загрузки</p>
+                  </div>
+
+                  <div class="field">
+                    <label for="datasetLinkInput">Ссылка на облако</label>
+                    <input id="datasetLinkInput" type="text" placeholder="Добавьте ссылку на внешний источник данных" />
+                  </div>
+
+                  <div class="actions-stack actions-stack--compact dataset-actions-inline">
+                    <button id="attachDatasetBtn" class="primary-btn compact-action-btn" type="button">Привязать</button>
+                    <button id="exportDatasetBtn" class="secondary-btn compact-action-btn" type="button">Экспорт проекта</button>
+                    <button id="trainModelBtn" class="secondary-btn compact-action-btn" type="button">Обучить модель</button>
+                  </div>
+                </div>
+
+                <div class="dataset-unified-section dataset-status-section">
+                  <h4>Статусы</h4>
+
+                  <div class="stats dataset-stats">
+                    <div class="stat">
+                      <span>Сохранено масок</span>
+                      <strong id="datasetMasksCountValue">0</strong>
+                    </div>
+                    <div class="stat">
+                      <span>Подключён архив</span>
+                      <strong id="datasetZipStatusValue">Нет</strong>
+                    </div>
+                    <div class="stat">
+                      <span>Ссылка</span>
+                      <strong id="datasetLinkStatusValue">Нет</strong>
+                    </div>
+                    <div class="stat">
+                      <span>Статус обучения</span>
+                      <strong id="datasetTrainingStatusValue">Не запущено</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel dataset-panel wide-dataset-panel">
+              <h3>Примеры для дообучения</h3>
+              <div id="datasetExamplesEmpty" class="history-empty">
+                Пока нет сохранённых примеров. Используй вкладку «Разметка» на основном экране.
+              </div>
+              <div id="datasetExamplesList" class="dataset-examples-list hidden"></div>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
