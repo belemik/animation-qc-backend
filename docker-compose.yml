@@ -1,33 +1,11 @@
-services:
-  animation-qc-ai:
-    container_name: animation-qc-ai
-    build: .
-    expose:
-      - "8000"
-    environment:
-      FRONTEND_DIR: /app/frontend
-      UPLOADS_DIR: /app/uploads
-      PREVIEWS_DIR: /app/previews
-      ANNOTATIONS_DIR: /app/annotations
-      EXPORTS_DIR: /app/exports
-      ALLOWED_ORIGINS: "*"
-    volumes:
-      - ./uploads:/app/uploads
-      - ./previews:/app/previews
-      - ./annotations:/app/annotations
-      - ./exports:/app/exports
-      - ./models:/app/models
-      - ./project_datasets:/app/project_datasets
-      - ./training_logs:/app/training_logs
-    restart: unless-stopped
+version: "3.9"
 
-  nginx:
-    image: nginx:stable-alpine
-    container_name: animation-qc-nginx
-    depends_on:
-      - animation-qc-ai
+services:
+  backend:
+    build: .
+    container_name: animation-qc-backend
     ports:
-      - "80:80"
+      - "8000:8000"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    restart: unless-stopped
+      - .:/app
+    restart: always
